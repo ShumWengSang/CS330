@@ -1,4 +1,4 @@
-#!perl -w
+#!/usr/bin/perl
 
 my @sizes=(100,200,300,400,500,750,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000);
 
@@ -26,4 +26,3 @@ foreach my $size ( @sizes ) {
     my $dev = sqrt( $var ); # deviation = sqrt of variance
     print "($size, $av) +- ($dev,$dev)\n"; # format for pgfplot
 }
-:set ff=unix

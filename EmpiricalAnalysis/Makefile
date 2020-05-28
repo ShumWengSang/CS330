@@ -34,13 +34,8 @@ gcc0:
 	$(GCC) -o $(PRG) $(CYGWIN) $(DRIVER0)  $(GCCFLAGS)
 
 gendata:
-	for i in 100 200 300 400 500 750 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000; do ./$(PRG) $$i 100> data.$$i; done
+	for i in 100 200 300 400 500 750 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000; do ./$(PRG) $$i 200> data.$$i; done
 latex:
 	pdflatex report.tex
 clean:
 	rm -f *.exe *.o *.obj report.aux report.log 
-
-target:
-	for number in 1 2 3 4 ; do \
-		echo $$number ; \
-	done
