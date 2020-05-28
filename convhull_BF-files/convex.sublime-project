@@ -1,0 +1,14 @@
+{
+	"folders":
+	[
+		{
+			"path": "/etc/dbus-1/session.d"
+		}
+	],
+	"settings":
+	{
+		"sublimegdb_arguments": "11",
+		"sublimegdb_commandline": "gdb -nx -readnow -fullname --interpreter=mi -args ./gnu.exe",
+		"sublimegdb_workingdir": "${folder:${project_path:bin/gnu.exe}}"
+	}
+}

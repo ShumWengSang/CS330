@@ -3,7 +3,7 @@
 my @sizes=(100,200,300,400,500,750,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000);
 
 foreach my $size ( @sizes ) {
-    open IN, "<data.$size" or die "data.$size cannot be open";
+    open IN, "<./data.$size" or die "data.$size cannot be open";
 #all data files are 1-liners
     my $line = <IN>; 
     close IN;
@@ -26,3 +26,4 @@ foreach my $size ( @sizes ) {
     my $dev = sqrt( $var ); # deviation = sqrt of variance
     print "($size, $av) +- ($dev,$dev)\n"; # format for pgfplot
 }
+:set ff=unix

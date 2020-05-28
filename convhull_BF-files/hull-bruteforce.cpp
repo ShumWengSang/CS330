@@ -1,6 +1,7 @@
 #include "hull-bruteforce.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 bool Point::operator==( Point const& arg2 ) const {
     return ( (x==arg2.x) && (y==arg2.y) );
@@ -44,12 +45,12 @@ static bool arePointsOnOneSideOfLine(std::pair<Point, Point> const & line, std::
 	bool isLeftSide = false;
 	bool isRightSide = false;
 	// If every point is on one side of iter_swap
-	for(int i = 0; i < points.size(); ++i)
+	for(uint i = 0; i < points.size(); ++i)
 	{
 		std::pair<bool, bool> side = get_location(
-			pairPoint.first.x, pairPoint.first.y, 
-			pairPoint.second.x, pairPoint.second.y,
-			points[k].x, points[i].y)
+			line.first.x, line.first.y, 
+			line.second.x, line.second.y,
+			points[i].x, points[i].y);
 		bool onLeftSide = side.first;
 		bool onRightSide = side.second;
 		
@@ -77,12 +78,12 @@ static bool arePointsOnOneSideOfLine(std::pair<Point, Point> const & line, std::
 
 static bool DoPointsExistsOnRightOfLine(std::pair<Point, Point> const & line, std::vector<Point> const & points)
 {
-	for(int i = 0; i < points.size(); ++i)
+	for(uint i = 0; i < points.size(); ++i)
 	{
 		std::pair<bool, bool> side = get_location(
-			pairPoint.first.x, pairPoint.first.y, 
-			pairPoint.second.x, pairPoint.second.y,
-			points[k].x, points[i].y)
+			line.first.x, line.first.y, 
+			line.second.x, line.second.y,
+			points[i].x, points[i].y);
 		if(side.second)
 		{
 			return true;
@@ -100,11 +101,11 @@ std::set<int> hullBruteForce ( std::vector< Point > const& points ) {
 	std::set<int> hull_indices;
 	
 	// For each pair
-	for(int i = 0; i < points.size(); ++i)
+	for(uint i = 0; i < points.size(); ++i)
 	{
-		for(int j = i + 1; j < points.size(); ++j)
+		for(uint j = i + 1; j < points.size(); ++j)
 		{
-			std::pair<Point,Point> pairPoint = make_pair(points[i], points[j]);
+			std::pair<Point,Point> pairPoint = std::make_pair(points[i], points[j]);
 			if(arePointsOnOneSideOfLine(pairPoint, points))
 			{
 				hull_indices.emplace(i);
@@ -118,9 +119,9 @@ std::set<int> hullBruteForce ( std::vector< Point > const& points ) {
 
 int FindSmallestXPoint(std::vector<Point> const & points)
 {
-	int smallestIndex = 999;
+	uint smallestIndex = 999;
 	float smallestX = 99999;
-	for(int i = 0; i < points.size(); ++i)
+	for(uint i = 0; i < points.size(); ++i)
 	{
 		if(points[i].x < smallestX)
 		{
@@ -132,36 +133,42 @@ int FindSmallestXPoint(std::vector<Point> const & points)
 }
 
 std::vector<int> hullBruteForce2 ( std::vector< Point > const& points ) {
-	int num_points = points.size();
+	uint num_points = points.size();
 	if ( num_points < 3 ) throw "bad number of points";
 
 	std::vector<int> hull_indices;
 
 	// Find initial point for hull as smallest x*point
-	int initialPoint = FindSmallestXPoint(points);
+	uint initialPoint = FindSmallestXPoint(points);
 	hull_indices.emplace_back(initialPoint);
 	
-	int currentPoint = initialPoint;
+	uint currentPoint = initialPoint;
+	bool firstPoint = true;
 	// Using the initial point and other points as a line
 	// This should loop in a circle around all the points, creating the hull, and exiting
 	// when we are back at the begining of the circle
-	for(int i = 0; i < points; ++i)
+	for(uint i = 0; i < points.size(); ++i)
 	{
-		std::pair<Point,Point> pairPoint = make_pair(points[currentPoint], points[i]);
+		if(i == currentPoint)
+			continue;
+		std::pair<Point,Point> pairPoint = std::make_pair(points[currentPoint], points[i]);
 		// If there are no points on the right side.
-		if(!DoPointsExistsOnRightOfLine(pairPoint, points)
+		if(!DoPointsExistsOnRightOfLine(pairPoint, points))
 		{
 			// If we detect that we are back to the front, we exit the loop
-			if(i == initialPoint)
+			// Hack detection to determine if its the very first loop.
+			if(i == initialPoint && !firstPoint)
 			{
 				break;
 			}
 			// Add this point to the 
 			hull_indices.emplace_back(i);
 			currentPoint = i;
+
+			firstPoint = false;
 			
 			// Reset the loop
-			i = 0;
+			i = -1;
 		}
 	}
 	

@@ -1,6 +1,6 @@
-PRG=gnu.exe
+PRG=bin/gnu.exe
 GCC=g++
-GCCFLAGS=-O2 -Wall -Wextra -ansi -std=c++11 -Weffc++ -Wold-style-cast -Woverloaded-virtual -Wsign-promo  -Wctor-dtor-privacy -Wnon-virtual-dtor -Wreorder
+GCCFLAGS=-O3 -Wall -Wextra -ansi -std=c++11 -Weffc++ -Wold-style-cast -Woverloaded-virtual -Wsign-promo  -Wctor-dtor-privacy -Wnon-virtual-dtor -Wreorder -g
 
 MSC=cl
 MSCFLAGS=/EHa /W4 /Za /Zc:forScope /nologo /D_CRT_SECURE_NO_DEPRECATE /D"_SECURE_SCL 0" /O2i /GL
@@ -25,19 +25,19 @@ msc0:
 0 1 2 3 4 5 6 8 9 10 11 12:
 	@echo "running test$@"
 	@echo "should run in less than 200 ms"
-	./$(PRG) $@ >studentout$@
+	time ./$(PRG) $@ >studentout$@
 	@echo "lines after the next are mismatches with master output -- see out$@"
 	diff out$@ studentout$@ $(DIFFLAGS)
 7:
 	@echo "running test$@"
 	@echo "should run in less than 5000 ms"
-	./$(PRG) $@ >studentout$@
+	time ./$(PRG) $@ >studentout$@
 	@echo "lines after the next are mismatches with master output -- see out$@"
 	diff out$@ studentout$@ $(DIFFLAGS)
 13:
 	@echo "running test$@"
 	@echo "should run in less than 500 ms"
-	./$(PRG) $@ >studentout$@
+	time ./$(PRG) $@ >studentout$@
 	@echo "lines after the next are mismatches with master output -- see out$@"
 	diff out$@ studentout$@ $(DIFFLAGS)
 mem0 mem1 mem2 mem3 mem4 mem5 mem6 mem7 mem8 mem9 mem10 mem11 mem12 mem13:
