@@ -1,8 +1,9 @@
 #include "tsp.h"
 #include <fstream>
-#include <string>
+#include <iostream>
+#include <limits>  // numeric_limits
 
-void read( char const* filename, MAP& map, int& TotalCity )
+void readCopy( char const* filename, MAP& map, int& TotalCity )
 {
     map.clear();
     std::ifstream in( filename, std::ifstream::in );
@@ -30,20 +31,20 @@ void read( char const* filename, MAP& map, int& TotalCity )
             map[j][i] = map[i][j];
         }
     }
-	filestream.close();
+	in.close();
 }
 
+void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int currPos,
+	unsigned currDistance, unsigned count, unsigned totalCity, std::vector<int> & visitingOrder,
+	unsigned& currMinDistance, std::vector<int> & shortestAnswer);
 
 std::vector<int> SolveTSP(char const* filename)
 {
-	std::vector<int> shortestDistance;
-	
-	
 	// Do file I/O
 	int totalCity;
 	MAP map;
 	
-	read(filename, map, totalCity);
+	readCopy(filename, map, totalCity);
 	
 	std::vector<bool> visitedArr(totalCity);
 	std::vector<int> shortestAnswer;
@@ -56,11 +57,11 @@ std::vector<int> SolveTSP(char const* filename)
 	SolveTSPRecursive(map, visitedArr, 0, 0, 1, totalCity, 
 		visitingOrder, initMinDistance, shortestAnswer);
 	
-	return shortestDistance;
+	return shortestAnswer;
 }
 
 void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int currPos,
-	unsigned currDistance, int count, unsigned totalCity, std::vector<int> & visitingOrder,
+	unsigned currDistance, unsigned count, unsigned totalCity, std::vector<int> & visitingOrder,
 	unsigned& currMinDistance, std::vector<int> & shortestAnswer)
 {
 	// If last node is reached and it has a link 
@@ -83,7 +84,7 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
     // Loop to traverse the adjacency list 
     // of currPos node and increasing the count 
 	// and updating cost
-    for (int i = 0; i < totalCity; i++) 
+    for (unsigned i = 0; i < totalCity; i++) 
 	{ 
         if (!visitedCities[i] && map[currPos][i])
 		{ 
@@ -92,7 +93,7 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
 			visitingOrder.push_back(currPos);
 			
 			SolveTSPRecursive(map, visitedCities, i,
-				currDistance + map[currPos][i], totalCity,  count + 1, 
+				currDistance + map[currPos][i], count + 1, totalCity, visitingOrder,
 				currMinDistance, shortestAnswer);
 			visitingOrder.pop_back();
             // Mark ith node as unvisited 
