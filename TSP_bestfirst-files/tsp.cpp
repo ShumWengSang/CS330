@@ -27,9 +27,11 @@ void readCopy( char const* filename, MAP& map, int& TotalCity )
                 std::cout << "problem reading " << filename << std::endl;
                 return;
             }
-            in >> map[i][j];
+            in >> map[i][j]; 
             map[j][i] = map[i][j];
+
         }
+        map[i][i] = 0;
     }
 	in.close();
 }
@@ -53,9 +55,13 @@ std::vector<int> SolveTSP(char const* filename)
 	visitingOrder.reserve(totalCity);
 	
 	unsigned initMinDistance = -1u;
-	
-	SolveTSPRecursive(map, visitedArr, 0, 0, 1, totalCity, 
-		visitingOrder, initMinDistance, shortestAnswer);
+
+    visitedArr[0] = true;
+    visitingOrder.push_back(0);
+
+	SolveTSPRecursive(map, visitedArr, 0, 
+        0, 1, totalCity, visitingOrder, 
+        initMinDistance, shortestAnswer);
 	
     shortestAnswer.push_back(0);
 
@@ -71,13 +77,12 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
     // keep the minimum value out of the total cost 
     // of traversal and "ans" 
     // Finally return to check for more possible values 
-    if (count == totalCity && map[currPos][0])
+    if (count == (totalCity) && map[currPos][0])
 	{ 
 		if(currMinDistance > currDistance + map[currPos][0])
 		{
 			currMinDistance = currDistance + map[currPos][0];
 			shortestAnswer = visitingOrder; 
-            shortestAnswer.push_back(currPos);
 		}
 		
         return; 
@@ -93,7 +98,7 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
 		{ 
             // Mark as visited 
             visitedCities[i] = true; 
-			visitingOrder.push_back(currPos);
+			visitingOrder.push_back(i);
 			
 			SolveTSPRecursive(map, visitedCities, i,
 				currDistance + map[currPos][i], count + 1, totalCity, visitingOrder,
