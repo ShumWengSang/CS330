@@ -68,6 +68,19 @@ std::vector<int> SolveTSP(char const* filename)
 	return shortestAnswer;
 }
 
+unsigned CalcHeuristic(MAP const & map, unsigned currPos, unsigned totalCity, std::vector<bool> const& visited)
+{
+    unsigned LowerBoundHeuristic = 0;
+    for (unsigned i = 0; i < totalCity; i++)
+    {
+        if (!visited[i])
+        {
+            LowerBoundHeuristic += map[currPos][i];
+        }
+    }
+    return LowerBoundHeuristic;
+}
+
 void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int currPos,
 	unsigned currDistance, unsigned count, unsigned totalCity, std::vector<int> & visitingOrder,
 	unsigned& currMinDistance, std::vector<int> & shortestAnswer)
@@ -96,16 +109,24 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
 	{ 
         if (!visitedCities[i] && map[currPos][i])
 		{ 
-            // Mark as visited 
-            visitedCities[i] = true; 
-			visitingOrder.push_back(i);
-			
-			SolveTSPRecursive(map, visitedCities, i,
-				currDistance + map[currPos][i], count + 1, totalCity, visitingOrder,
-				currMinDistance, shortestAnswer);
-			visitingOrder.pop_back();
-            // Mark ith node as unvisited 
-            visitedCities[i] = false; 
+            // Simple check
+            if ((currDistance + map[currPos][i]) < currMinDistance)
+            {
+                unsigned lowerBoundHeuristic = CalcHeuristic(map, currPos, totalCity, visitedCities);
+                if ((lowerBoundHeuristic + currDistance) < currMinDistance)
+                {
+					// Mark as visited 
+					visitedCities[i] = true;
+					visitingOrder.push_back(i);
+
+					SolveTSPRecursive(map, visitedCities, i,
+						currDistance + map[currPos][i], count + 1, totalCity, visitingOrder,
+						currMinDistance, shortestAnswer);
+					visitingOrder.pop_back();
+					// Mark ith node as unvisited 
+					visitedCities[i] = false;
+                }
+            }
         } 
     } 
 }
