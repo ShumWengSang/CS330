@@ -57,6 +57,8 @@ std::vector<int> SolveTSP(char const* filename)
 	SolveTSPRecursive(map, visitedArr, 0, 0, 1, totalCity, 
 		visitingOrder, initMinDistance, shortestAnswer);
 	
+    shortestAnswer.push_back(0);
+
 	return shortestAnswer;
 }
 
@@ -74,7 +76,8 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
 		if(currMinDistance > currDistance + map[currPos][0])
 		{
 			currMinDistance = currDistance + map[currPos][0];
-			shortestAnswer = visitingOrder;
+			shortestAnswer = visitingOrder; 
+            shortestAnswer.push_back(currPos);
 		}
 		
         return; 
