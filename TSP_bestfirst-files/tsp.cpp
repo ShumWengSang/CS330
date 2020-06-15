@@ -75,7 +75,15 @@ unsigned CalcHeuristic(MAP const & map, unsigned currPos, unsigned totalCity, st
     {
         if (!visited[i])
         {
-            LowerBoundHeuristic += map[currPos][i];
+            int min_in_row = std::numeric_limits<int>::max();
+            for (int j = 0; j < totalCity; ++j) {
+                
+                if (!visited[j])
+                {
+                    if (min_in_row > map[i][j]) min_in_row = map[i][j];
+                }
+            }
+            LowerBoundHeuristic += min_in_row;
         }
     }
     return LowerBoundHeuristic;
