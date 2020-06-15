@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <limits>  // numeric_limits
+#include <algorithm>
 
 void readCopy( char const* filename, MAP& map, int& TotalCity )
 {
@@ -68,17 +69,23 @@ std::vector<int> SolveTSP(char const* filename)
 	return shortestAnswer;
 }
 
-unsigned CalcHeuristic(MAP const & map, unsigned currPos, unsigned totalCity, std::vector<bool> const& visited)
+unsigned CalcHeuristic(MAP const & map, unsigned totalCity, std::vector<bool> const& visited, std::vector<int> const& visitingOrder)
 {
     unsigned LowerBoundHeuristic = 0;
+
+    // Last node
+    if (visitingOrder.size() == totalCity - 1)
+        return 0;
+
     for (unsigned i = 0; i < totalCity; i++)
     {
         if (!visited[i])
         {
             int min_in_row = std::numeric_limits<int>::max();
-            for (int j = 0; j < totalCity; ++j) {
+            for (unsigned j = 0; j < totalCity; ++j) 
+            {
                 
-                if (!visited[j])
+                if (!visited[j] && j != i)
                 {
                     if (min_in_row > map[i][j]) min_in_row = map[i][j];
                 }
@@ -98,7 +105,7 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
     // keep the minimum value out of the total cost 
     // of traversal and "ans" 
     // Finally return to check for more possible values 
-    if (count == (totalCity) && map[currPos][0])
+    if (count == totalCity && map[currPos][0])
 	{ 
 		if(currMinDistance > currDistance + map[currPos][0])
 		{
@@ -113,28 +120,46 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
     // Loop to traverse the adjacency list 
     // of currPos node and increasing the count 
 	// and updating cost
-    for (unsigned i = 0; i < totalCity; i++) 
-	{ 
+
+    
+    // Generate heuristic for each level
+    using Index = int;
+    using HeuristicPair = std::pair<unsigned, Index>;
+    std::vector<HeuristicPair> heuristics;
+    heuristics.reserve(totalCity);
+
+    for (unsigned i = 0; i < totalCity; ++i)
+    {
         if (!visitedCities[i] && map[currPos][i])
-		{ 
+        {
             // Simple check
             if ((currDistance + map[currPos][i]) < currMinDistance)
             {
-                unsigned lowerBoundHeuristic = CalcHeuristic(map, currPos, totalCity, visitedCities);
-                if ((lowerBoundHeuristic + currDistance) < currMinDistance)
+                unsigned lowerBoundHeuristic = CalcHeuristic(map, totalCity, visitedCities, visitingOrder);
+                if (lowerBoundHeuristic + currDistance < currMinDistance)
                 {
-					// Mark as visited 
-					visitedCities[i] = true;
-					visitingOrder.push_back(i);
-
-					SolveTSPRecursive(map, visitedCities, i,
-						currDistance + map[currPos][i], count + 1, totalCity, visitingOrder,
-						currMinDistance, shortestAnswer);
-					visitingOrder.pop_back();
-					// Mark ith node as unvisited 
-					visitedCities[i] = false;
+                    heuristics.push_back(std::make_pair(lowerBoundHeuristic + currDistance, i));
                 }
             }
-        } 
-    } 
+        }
+    }
+
+    std::sort(heuristics.begin(), heuristics.end(), [](HeuristicPair const &a, HeuristicPair const &b)
+        {
+            return a.first < b.first;
+        });
+
+    for (unsigned i = 0; i < heuristics.size(); ++i)
+    {
+        Index index = heuristics[i].second;
+        // Mark as visited 
+        visitedCities[index] = true;
+        visitingOrder.push_back(index);
+
+        SolveTSPRecursive(map, visitedCities, index,
+            currDistance + map[currPos][index], count + 1, totalCity, visitingOrder,
+            currMinDistance, shortestAnswer);
+        visitingOrder.pop_back();
+        visitedCities[index] = false;
+    }
 }
