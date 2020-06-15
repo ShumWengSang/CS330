@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <limits>  // numeric_limits
-#include <algorithm>
+#include <map>
 
 void readCopy( char const* filename, MAP& map, int& TotalCity )
 {
@@ -124,9 +124,9 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
     
     // Generate heuristic for each level
     using Index = int;
-    using HeuristicPair = std::pair<unsigned, Index>;
-    std::vector<HeuristicPair> heuristics;
-    heuristics.reserve(totalCity);
+    using Heuristic = unsigned;
+    using HeuristicPair = std::pair<Heuristic, Index>;
+    std::map<Heuristic, Index> heuristics;
 
     for (unsigned i = 0; i < totalCity; ++i)
     {
@@ -138,21 +138,15 @@ void SolveTSPRecursive(MAP const & map, std::vector<bool> & visitedCities, int c
                 unsigned lowerBoundHeuristic = CalcHeuristic(map, totalCity, visitedCities, visitingOrder);
                 if (lowerBoundHeuristic + currDistance < currMinDistance)
                 {
-                    heuristics.push_back(std::make_pair(lowerBoundHeuristic + currDistance, i));
+                    heuristics[lowerBoundHeuristic + currDistance] = i;
                 }
             }
         }
     }
 
-    std::sort(heuristics.begin(), heuristics.end(), [](HeuristicPair const &a, HeuristicPair const &b)
-        {
-            return a.first < b.first;
-        });
-
-    for (unsigned i = 0; i < heuristics.size(); ++i)
+    for (auto iter = heuristics.begin(); iter != heuristics.end(); ++iter)
     {
-        Index index = heuristics[i].second;
-        // Mark as visited 
+        Index index = iter->second;
         visitedCities[index] = true;
         visitingOrder.push_back(index);
 
