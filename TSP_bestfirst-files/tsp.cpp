@@ -33,7 +33,7 @@ void readCopy( char const* filename, MAP& map, int& TotalCity )
             map[j][i] = map[i][j];
 
         }
-        map[i][i] = 0;
+        map[i][i] = std::numeric_limits<int>::max();
     }
 	in.close();
 }
@@ -43,7 +43,7 @@ struct TSPData
     MAP const& map;
     unsigned currPos;
     unsigned count;
-    unsigned totalCity;
+    const unsigned totalCity;
     std::vector<bool>& visitedCities;
 
     unsigned currDistance;
@@ -63,9 +63,11 @@ struct TSPData
 
 void SolveTSPRecursive(TSPData& data);
 
+int lb;
+int recur;
+
 std::vector<int> SolveTSP(char const* filename)
 {
-	// Do file I/O
 	int totalCity;
 	MAP map;
 	
@@ -92,32 +94,54 @@ std::vector<int> SolveTSP(char const* filename)
 	
     shortestAnswer.push_back(0);
 
+
+	std::cout << "Heuristic Recursive " << lb << std::endl;
+	std::cout << "Recur " << recur << std::endl;
+
 	return shortestAnswer;
 }
 
-unsigned CalcHeuristicRec(TSPData& data, int cityIndexSource, int count, int result)
+static int LowerBound(MAP const& map,
+    int size,
+    std::vector<int>& curSolutionSoFar,
+    int const& costSoFar)
 {
-    unsigned minimum = -1u;
-    unsigned index = -1;
 
-    if (data.totalCity == count)
-        return data.map[cityIndexSource][0];
+	lb++;
 
-    for (int i = 1; i < data.totalCity; ++i)
+    int lowerBound = costSoFar;
+    int distToHome = map[0][curSolutionSoFar.back()];
+    for (int i = 1; i < size; ++i)
     {
-        if (data.visitedCities[i])
-            continue;
-        if (minimum > data.map[cityIndexSource][minimum])
+        if (std::find(curSolutionSoFar.begin(), curSolutionSoFar.end(), i) == curSolutionSoFar.end())
         {
-            minimum = data.map[cityIndexSource][minimum];
-            index = i;
+            if (distToHome > map[0][i])
+                distToHome = map[0][i];
+            int minInRow = std::numeric_limits<int>::max();
+            for (int j = 1; j < size; ++j)
+            {
+                int temp = curSolutionSoFar.back();
+                curSolutionSoFar.pop_back();
+                if (std::find(curSolutionSoFar.begin(), curSolutionSoFar.end(), j) == curSolutionSoFar.end())
+                {
+                    if (minInRow > map[i][j])
+                        minInRow = map[i][j];
+                }
+                curSolutionSoFar.push_back(temp);
+            }
+            if (minInRow != std::numeric_limits<int>::max())
+            {
+                lowerBound += minInRow;
+            }
+            else
+            {
+                lowerBound += map[curSolutionSoFar.back()][i];
+            }
         }
     }
-    // data.visitedCities[index] = true;
-    unsigned heu = CalcHeuristicRec(data, index, count + 1, result + minimum);
-    // data.visitedCities[index] = false;
-    return heu;
+    return lowerBound + distToHome;
 }
+
 
 unsigned CalcHeuristic(TSPData& data, int cityIndex)
 {
@@ -125,17 +149,19 @@ unsigned CalcHeuristic(TSPData& data, int cityIndex)
     unsigned DistanceHome = -1u;
     // Last node
     if (data.visitingOrder.size() == data.totalCity - 1)
-        return 0;
+        return data.map[cityIndex][0];
 
+    data.visitedCities[data.currPos] = false;
     for (unsigned i = 1; i < data.totalCity; ++i)       
     {
         if (data.visitedCities[i])
             continue;
 
         int min_in_row = std::numeric_limits<int>::max();
+
         for (unsigned j = 1; j < data.totalCity; ++j)
         {
-            if (j == cityIndex || (!data.visitedCities[j] && j != i))
+        	if ((!data.visitedCities[j] && j != i))
             {
                 if (min_in_row > data.map[i][j])
                     min_in_row = data.map[i][j];
@@ -144,7 +170,7 @@ unsigned CalcHeuristic(TSPData& data, int cityIndex)
         LowerBoundHeuristic += min_in_row;
         DistanceHome = std::min(static_cast<int>(DistanceHome), data.map[i][0]);
     }
-
+    data.visitedCities[data.currPos] = true;
     return LowerBoundHeuristic;
 }
 
@@ -183,7 +209,10 @@ void SolveTSPRecursive(TSPData &data)
     // keep the minimum value out of the total cost 
     // of traversal and "ans" 
     // Finally return to check for more possible values 
-    if (data.count == data.totalCity && data.map[data.currPos][0])
+
+	recur++;
+
+    if (data.count == data.totalCity)
     {
         if (data.bsf > data.currDistance + data.map[data.currPos][0])
         {
@@ -195,32 +224,34 @@ void SolveTSPRecursive(TSPData &data)
     }
 
     // Generate heuristic for each level
-    using Index = int;
+    using Index = int;	
     using Heuristic = unsigned;
     //using HeuristicPair = std::pair<unsigned, Index>;
 
 	std::multimap <Heuristic, Index> heuristics;
 
+	// All cities I have not visited
 	for (unsigned i = 1; i < data.totalCity; ++i)
 	{
-		if (!data.visitedCities[i] && data.map[data.currPos][i])
+		if(data.visitedCities[i])
+			continue;
+		
+		// Calculate a heuristic for those cities.
+		data.visitingOrder.push_back(i);
+
+		Heuristic lowerBoundHeuristic = LowerBound(data.map, data.totalCity, data.visitingOrder, 0);
+		//Heuristic lowerBoundHeuristic = CalcHeuristic(data, i);
+		if (lowerBoundHeuristic + data.currDistance < data.bsf)
 		{
-			// Simple check
-			// if ((data.currDistance + data.map[data.currPos][i]) < data.bsf)
-			{
-				Heuristic lowerBoundHeuristic = CalcHeuristic(data);
-				if (lowerBoundHeuristic + data.currDistance < data.bsf)
-				{
-					heuristics.insert(std::make_pair(lowerBoundHeuristic + data.currDistance, i));
-				}
-			}
+			heuristics.insert(std::make_pair(lowerBoundHeuristic + data.currDistance, i));
 		}
+		data.visitingOrder.pop_back();
 	}
 
 
     for (auto iter = heuristics.begin(); iter != heuristics.end(); ++iter)
     {
-        if (iter->first > data.bsf)
+        if (iter->first >= data.bsf)
             break;
         Index index = iter->second;
 
