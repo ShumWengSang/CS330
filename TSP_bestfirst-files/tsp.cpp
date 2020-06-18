@@ -240,6 +240,8 @@ void SolveTSPRecursive(TSPData &data)
 		data.visitingOrder.push_back(i);
 
 		Heuristic lowerBoundHeuristic = LowerBound(data.map, data.totalCity, data.visitingOrder, 0);
+
+		std::cout << "Lower bound is "  << lowerBoundHeuristic + data.currDistance << std::endl;
 		//Heuristic lowerBoundHeuristic = CalcHeuristic(data, i);
 		if (lowerBoundHeuristic + data.currDistance < data.bsf)
 		{
