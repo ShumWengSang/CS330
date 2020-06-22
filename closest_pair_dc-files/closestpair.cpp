@@ -74,7 +74,7 @@ float StripContention(std::vector<Point>& arr, float bsf)
 	{
 		// Given that y is sorted, we can have a break condition 
 		//if the points are on the same Y
-		for(unsigned j = i + 1; j < arr.size() && (arr[i].y - arr[i].y); ++j)
+		for(unsigned j = i + 1; j < arr.size() && (arr[i].y - arr[i].y) < d; ++j)
 		{
 			d = std::min(Distance(arr[i], arr[j]), d);
 		}
@@ -84,8 +84,8 @@ float StripContention(std::vector<Point>& arr, float bsf)
 
 float closestPair_aux (Point* data, int size) 
 {
-	if (size==0) throw "zero size subset";
-	if (size==1) return std::numeric_limits<float>::max();
+	if (size == 0) throw "zero size subset";
+	if (size == 1) return std::numeric_limits<float>::max();
 
 	// If there are 2 or 3 points, then use brute force  
     if (size <= 3)  
@@ -104,11 +104,12 @@ float closestPair_aux (Point* data, int size)
 
     // Build an array of points that are close enough to the middle
     // to contest minimum distance
-    std::vector<Point> contentionPoints(size);  
-    int j = 0;  
+    std::vector<Point> contentionPoints;
+	contentionPoints.reserve(size);
+
     for (int i = 0; i < size; i++)  
         if (std::abs(data[i].x - midPoint.x) < d)  
-            contentionPoints[j] = data[i], j++;  
+            contentionPoints.push_back(data[i]);  
 
     // Find the minimum distance in the contention points
     float contention_d = StripContention(contentionPoints, d);
