@@ -33,6 +33,12 @@ msc0:
 	@echo "should run in less than 1400 ms"
 	./$(PRG) $@ >studentout$@
 	@echo "lines after the next are mismatches with master output -- see out$@"
+
+15:
+	@echo "running test$@"
+	@echo "should run in less than 1400 ms"
+	./$(PRG) $@ >studentout$@
+	@echo "lines after the next are mismatches with master output -- see out$@"
 	diff out$@ studentout$@ $(DIFFLAGS)
 mem0 mem1 mem2 mem3 mem4 mem5 mem6 mem7 mem8 mem9:
 	@echo "running memory test $@"
