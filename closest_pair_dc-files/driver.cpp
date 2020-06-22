@@ -109,7 +109,13 @@ void test14() {
     std::cout << closestPair( points ) << std::endl;
 }
 
-void (*pTests[])(void) = { test0,test1,test2,test3,test4,test5,test6,test7,test8,test9,test10,test11,test12,test13,test14 };
+void test15() {
+    std::vector<Point> points;
+    readPoints("points9", points);
+    std::cout << closestPair(points) << std::endl;
+}
+
+void (*pTests[])(void) = { test0,test1,test2,test3,test4,test5,test6,test7,test8,test9,test10,test11,test12,test13,test14,test15 };
 
 int main( int argc, char ** argv) {
     if (argc!=2) return 1;
