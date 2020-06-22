@@ -76,7 +76,9 @@ float StripContention(std::vector<Point>& arr, float bsf)
 		//if the points are on the same Y
 		for(unsigned j = i + 1; j < arr.size() && (arr[i].y - arr[i].y) < d; ++j)
 		{
-			d = std::min(Distance(arr[i], arr[j]), d);
+			float distance = Distance(arr[i], arr[j]);
+			if(distance != 0)
+				d = std::min(distance, d);
 		}
 	}
 	return d;
@@ -88,9 +90,13 @@ float closestPair_aux (Point* data, int size)
 	if (size == 1) return std::numeric_limits<float>::max();
 
 	// If there are 2 or 3 points, then use brute force  
-    if (size <= 3)  
-        return BruteForce(data, size);  
-  
+	if (size <= 3)
+	{
+		float d = BruteForce(data, size);
+		if (d == 0)
+			d = std::numeric_limits<float>::max();
+		return d;
+	}
     // Find the middle point  
     int mid = size / 2;  
     Point midPoint = data[mid];  
