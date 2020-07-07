@@ -48,7 +48,7 @@ std::vector<int> knapsackDP( std::vector<Item> const& items, int const& W ) {
                     items[i - 1].value + table[w - items[i - 1].weight][i - 1],
                     table[w][i - 1]);
             else
-                table[w][i - 1] = table[w][i - 1];
+                table[w][i] = table[w][i - 1];
         }
 	}
 	/*  ........... */
@@ -119,9 +119,11 @@ int knapsackRecMemAux( std::vector<Item> const&, int const&, int, Table& );
 std::vector<int> knapsackRecMem( std::vector<Item> const& items, int const& W ) {
 	int num_items = items.size();
 
-    Table table = Table(W + 1, std::vector<int>(num_items + 1, 0));
+    Table table = Table(W + 1, std::vector<int>(num_items + 1, -1));
+    for (int i = 0; i < num_items + 1; ++i) table[i][0] = 0;
+    for (int i = 0; i < W + 1; ++i) table[0][i] = 0;
 
-    knapsackRecMemAux(items, W, num_items - 1, table);
+    knapsackRecMemAux(items, W, num_items, table);
 
 	//print table - debugging?
     //do not delete this code
@@ -139,7 +141,7 @@ std::vector<int> knapsackRecMem( std::vector<Item> const& items, int const& W ) 
         for ( int w=0; w<=W; ++w) {
             std::cout << w << "| ";
             for ( int n=0; n<=num_items; ++n) {
-                //std::cout << table[w][n] << "     ";
+                std::cout << table[w][n] << "     ";
             }
             std::cout << std::endl;
         }
@@ -172,6 +174,7 @@ knapsackRecMemAux( std::vector<Item> const& items, int const& W, int index, Tabl
     {
         return 0;
     }
+    // Already calculated
     if (table[W][index] != -1)
         return table[W][index];
     // Don't include if item is already overweight
