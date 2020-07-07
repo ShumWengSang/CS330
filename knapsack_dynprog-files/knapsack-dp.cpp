@@ -120,8 +120,8 @@ std::vector<int> knapsackRecMem( std::vector<Item> const& items, int const& W ) 
 	int num_items = items.size();
 
     Table table = Table(W + 1, std::vector<int>(num_items + 1, -1));
-    for (int i = 0; i < num_items + 1; ++i) table[i][0] = 0;
-    for (int i = 0; i < W + 1; ++i) table[0][i] = 0;
+    for (int i = 0; i < num_items + 1; ++i) table[0][i] = 0;
+    for (int i = 0; i < W + 1; ++i) table[i][0] = 0;
 
     knapsackRecMemAux(items, W, num_items, table);
 
