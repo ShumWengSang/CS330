@@ -35,13 +35,12 @@ typedef std::vector< std::vector<int> > Table; //2-dimensional table
 std::vector<int> knapsackDP( std::vector<Item> const& items, int const& W ) {
 	int num_items = items.size();
 
-    Table table(items.size() + 1);
-    for (int i = 0; i < items.size() + 1; ++i)
-        table[i].assign(items.size() + 1, 0);
+    Table table = Table(W + 1, std::vector<int>(num_items + 1, 0));
 
-    int i, w;
-    for (i = 0; i <= items.size(); i++) {
-        for (w = 0; w <= W; w++) {
+    unsigned i;
+    int w;
+    for (i = 0; i <= items.size(); ++i) {
+        for (w = 0; w <= W; ++w) {
             if (i == 0 || w == 0)
                 table[w][i] = 0;
             else if (items[i - 1].weight <= w)
@@ -120,7 +119,7 @@ int knapsackRecMemAux( std::vector<Item> const&, int const&, int, Table& );
 std::vector<int> knapsackRecMem( std::vector<Item> const& items, int const& W ) {
 	int num_items = items.size();
 
-    Table table(num_items + 1, std::vector<int>(W + 1, 0));
+    Table table = Table(W + 1, std::vector<int>(num_items + 1, 0));
 
     knapsackRecMemAux(items, W, num_items - 1, table);
 
