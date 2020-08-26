@@ -87,12 +87,30 @@ void (*pTests[])() = {
     test6,test7,test8,test9,test10,test11
 }; 
 
+int count(int S[], int m, int n)
+{
+    // table[i] will be storing the number of solutions for 
+    // value i. We need n+1 rows as the table is constructed 
+    // in bottom up manner using the base case (n = 0) 
+    std::vector<int> table(n + 1);
+
+
+    // Base case (If given value is 0) 
+    table[0] = 1;
+
+    // Pick all coins one by one and update the table[] values 
+    // after the index greater than or equal to the value of the 
+    // picked coin 
+    for (int i = 0; i < m; i++)
+        for (int j = S[i]; j <= n; j++)
+            table[j] += table[j - S[i]];
+
+    return table[n];
+}
+
 #include <cstdio> // sscanf
 int main(int argc, char ** argv) {
-    if ( argc == 2 ) {
-        int test = 0;
-        std::sscanf(argv[1],"%i",&test);
-        pTests[test]();
-    }
+    int S[] = { 1,7,10 };
+    count(S, 3, 14);
     return 0;
 }
